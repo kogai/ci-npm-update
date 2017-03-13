@@ -1,28 +1,6 @@
-import { exec } from "child_process";
 import * as moment from "moment";
-import {read, diff, createIssue} from "./check_updates";
-
-function run(command: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        console.log(`>> ${command}`);
-        exec(command, {
-            encoding: "utf8",
-            maxBuffer: 1024 * 1024,
-        }, (error, stdout, stderr) => {
-            if (stdout.length > 0) {
-                console.log(stdout);
-            }
-            if (stderr.length > 0) {
-                console.error(stderr);
-            }
-            if (error) {
-                reject(error);
-            } else {
-                resolve(stdout);
-            }
-        });
-    });
-}
+import { GitHubApi, GitHubPullRequestParameters, GitHubPullRequestResponse }from "./github";
+import {read, diff, createIssue, run} from "./utils";
 
 export abstract class SkipRemainingTasks { }
 
@@ -35,6 +13,7 @@ export type Options = {
     gitUserName: string,
     gitUserEmail: string,
     execute: boolean, // default to dry-run mode
+    exclude: string[],
 }
 
 export function setupGitConfig(gitUserName: string, gitUserEmail: string): Promise<any> {
@@ -104,6 +83,19 @@ export function start({
                     base: baseBranch.trim(),
                 }),
             ]);
+        })
+        .then(([repositoryUrl, pullRequestData]: [string, GitHubPullRequestParameters]) => {
+            if (!execute) {
+                return <Promise<GitHubPullRequestResponse>>Promise.reject(new SkipToCreatePullRequest());
+            }
+
+            return new GitHubApi({
+                repositoryUrl: repositoryUrl.trim(),
+                token: githubAccessToken,
+            }).createPullRequest(pullRequestData);
+        })
+        .then((response) => {
+            return Promise.resolve(response.html_url);
         });
     });
 }
