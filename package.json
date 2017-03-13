@@ -32,6 +32,7 @@
     "@types/node": "^6.0.41",
     "moment": "^2.14.1",
     "request": "^2.74.0"
+    "npm-check-updates": "^2.10.3"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.28",
