@@ -1,9 +1,6 @@
-import { ShrinkWrap } from "./shrink_wrap";
-import { NpmConfig } from "./npm_config";
-import * as Issue from "./issue";
-import * as github from "./github";
 import { exec } from "child_process";
 import * as moment from "moment";
+import {read, diff, createIssue} from "./check_updates";
 
 function run(command: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -46,37 +43,21 @@ export function setupGitConfig(gitUserName: string, gitUserEmail: string): Promi
     return Promise.all<any>([setUserNamePromise, setUserEmailPromise]);
 }
 
-export function createGitBranch(branch: string): Promise<ShrinkWrap> {
+export function createGitBranch(branch: string): Promise<string> {
     console.log(`Creating a branch: ${branch}`);
 
-    return run(`git checkout -b ${branch}`).then(() => {
-        // npm update --depth 9999 might cause OOM:
-        // https://github.com/npm/npm/issues/11876
-        return run("rm -rf node_modules npm-shrinkwrap.json ; npm install");
-    }).then(() => {
-        // https://github.com/npm/npm/issues/11189
-        return run("npm shrinkwrap --dev");
-    }).then(() => {
-        return run("git add npm-shrinkwrap.json");
-    }).then(() => {
-        return run("git diff --cached");
-    }).then((diff) => {
-        if (diff.trim()) {
+    return run(`git checkout -b ${branch}`)
+    .then(() => read())
+    .then(() => run("git add package.json"))
+    .then(() => run("git diff --cached"))
+    .then(d => {
+        if (d.trim()) {
             return run(`git commit -m 'update npm dependencies'`);
         } else {
             return run("git checkout -").then(() => {
                 return Promise.reject(new AllDependenciesAreUpToDate());
             });
         }
-    }).then(() => {
-        return ShrinkWrap.read();
-    }).then((shrinkWrap) => {
-        return Promise.all([
-            Promise.resolve(shrinkWrap),
-            run("git checkout -"),
-        ]);
-    }).then(([shrinkWrap]) => {
-        return Promise.resolve(shrinkWrap);
     });
 }
 
@@ -93,24 +74,12 @@ export function start({
     const timestamp = moment().format("YYYYMMDDhhmmss");
     const branch = `npm-update/${timestamp}`;
 
-    return setupGitConfig(gitUserName, gitUserEmail).then(() => {
-        return ShrinkWrap.read();
-    }).then((shrinkWrap) => {
-        return Promise.all([
-            Promise.resolve(shrinkWrap),
-            createGitBranch(branch),
-        ]);
-    }).then(([current, updated]) => {
-        return current.diff(updated);
-    }).then((compareViewList) => {
-        if (compareViewList.length === 0) {
-            // There're only diffs in sub dependencies
-            // e.g. https://github.com/bitjourney/ci-npm-update/pull/21/files
-            return Promise.reject(new AllDependenciesAreUpToDate());
-        }
+    return setupGitConfig(gitUserName, gitUserEmail)
+    .then(() => diff())
+    .then(d => createIssue(d))
+    .then(async (issue) => {
+        await createGitBranch(branch);
 
-        return Issue.createBody(compareViewList, NpmConfig.readFromFile());
-    }).then((issue) => {
         console.log("-------");
         console.log(issue);
         console.log("--------");
@@ -136,16 +105,5 @@ export function start({
                 }),
             ]);
         });
-    }).then(([repositoryUrl, pullRequestData]: [string, github.GitHubPullRequestParameters]) => {
-        if (!execute) {
-            return <Promise<github.GitHubPullRequestResponse>>Promise.reject(new SkipToCreatePullRequest());
-        }
-
-        return new github.GitHubApi({
-            repositoryUrl: repositoryUrl.trim(),
-            token: githubAccessToken,
-        }).createPullRequest(pullRequestData);
-    }).then((response) => {
-        return Promise.resolve(response.html_url);
     });
 }
