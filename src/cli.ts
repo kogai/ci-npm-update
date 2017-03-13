@@ -1,42 +1,36 @@
-
+import * as program from "commander";
 import * as main from "./index";
+
+const list = (x: string): string[] => x.split(',');
+
+const {GITHUB_ACCESS_TOKEN, GIT_USER_NAME, GIT_USER_EMAIL} = process.env;
+
+program
+  .version('0.0.1')
+  .usage('[options] <file ...>')
+  .option('-t, --token <n>', 'GitHubToken', GITHUB_ACCESS_TOKEN)
+  .option('-n, --user-name <n>', 'GitHubUserName', GIT_USER_NAME)
+  .option('-e, --user-email <n>', 'GitHubUserName', GIT_USER_EMAIL)
+  .option('-E, --execute <n>', 'should execute', false)
+  .option('-x, --exclude <items>', 'packages that ignore update', list)
+  .parse(process.argv);
 
 function die(message: string) {
     console.error(message);
     process.exit(1);
 }
 
-const options: main.Options = {
-    githubAccessToken: process.env.GITHUB_ACCESS_TOKEN,
-    gitUserName: process.env.GIT_USER_NAME,
-    gitUserEmail: process.env.GIT_USER_EMAIL,
-    execute: false,
-};
+["token", "userName", "useEmail"].forEach(x => {
+    if (program[x]) die(`No value for ${x}`);
+});
 
-const args = process.argv.splice(2);
-for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg === "--token") {
-        if (++i === args.length) {
-            die(`No value for ${arg}`);
-        }
-        options.githubAccessToken = args[i];
-    } else if (arg === "--user-name") {
-        if (++i === args.length) {
-            die(`No value for ${arg}`);
-        }
-        options.gitUserName = args[i];
-    } else if (arg === "--user-email") {
-        if (++i === args.length) {
-            die(`No value for ${arg}`);
-        }
-        options.gitUserEmail = args[i];
-    } else if (arg === "--execute") {
-        options.execute = true;
-    } else {
-        die(`Unknown option: ${arg}`);
-    }
-}
+const options: main.Options = {
+    githubAccessToken: program.token,
+    gitUserName: program.userName,
+    gitUserEmail: program.userEmail,
+    execute: program.execute,
+    exclude: program.exclude,
+};
 
 main.start(options).then((pullRequestUrl) => {
     console.log("Successfully creqted a pull-request: %s", pullRequestUrl);
