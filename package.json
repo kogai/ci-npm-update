@@ -29,22 +29,22 @@
     "node": ">= 6.0.0"
   },
   "dependencies": {
-    "@types/node": "^6.0.41",
+    "@types/node": "^7.0.8",
     "commander": "https://registry.npmjs.org/commander/-/commander-2.3.0.tgz",
-    "moment": "^2.14.1",
+    "moment": "^2.17.1",
     "npm-check-updates": "^2.10.3",
-    "request": "^2.74.0"
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "@types/commander": "^2.3.31",
-    "@types/mocha": "^2.2.28",
-    "@types/power-assert": "^0.0.27",
-    "mocha": "^2.5.1",
-    "power-assert": "^1.4.1",
-    "source-map-support": "^0.4.0",
+    "@types/mocha": "^2.2.40",
+    "@types/power-assert": "^1.4.29",
+    "mocha": "^3.2.0",
+    "power-assert": "^1.4.2",
+    "source-map-support": "^0.4.11",
     "to-iso-string": "^0.0.2",
-    "ts-node": "^1.2.1",
-    "tslint": "^3.13.0",
-    "typescript": "^2.1.1"
+    "ts-node": "^2.1.0",
+    "tslint": "^4.5.1",
+    "typescript": "^2.2.1"
   }
 }
