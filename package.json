@@ -1,6 +1,6 @@
 {
   "name": "@kogai/ci-npm-update",
-  "version": "1.0.9",
+  "version": "1.10.0",
   "description": "Keep NPM dependencies up-to-date with CI, providing version-to-version diff for each library",
   "repository": {
     "type": "git",
