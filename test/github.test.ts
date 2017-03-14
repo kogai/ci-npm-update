@@ -1,6 +1,5 @@
 import * as assert from "power-assert";
 import { GitHubApi } from "../src/github";
-import { NpmConfig } from "../src/npm_config";
 
 const githubDataSet = {
     "github git url": "git://github.com/foo/something.useful.git",
@@ -50,12 +49,6 @@ describe("GitHubApi", () => {
             it(`extracts "repository" from ${name}`, () => {
                 assert(GitHubApi.extractRepository(url) === "something.useful");
             });
-        });
-    });
-    context(".parseUrl(package.json)", () => {
-        it(`can parse itself`, () => {
-            const npmConfig = new NpmConfig(require("../package.json"));
-            assert(GitHubApi.extractRepository(npmConfig.repository.url) === "ci-npm-update");
         });
     });
 });
