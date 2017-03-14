@@ -1,6 +1,6 @@
 import * as moment from "moment";
 import { GitHubApi, GitHubPullRequestParameters, GitHubPullRequestResponse }from "./github";
-import {read, diff, createIssue, run} from "./utils";
+import {read, diff, createIssue, run, IVersionDiff} from "./utils";
 
 export abstract class SkipRemainingTasks { }
 
@@ -56,7 +56,7 @@ export function start({
 
     return setupGitConfig(gitUserName, gitUserEmail)
     .then(() => diff())
-    .then(d => createIssue(d))
+    .then((d: IVersionDiff) => createIssue(d))
     .then(async (issue) => {
         await createGitBranch(branch);
 
