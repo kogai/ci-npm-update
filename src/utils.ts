@@ -3,15 +3,12 @@ import { run as runNcu, Diff } from "npm-check-updates";
 
 export const read = (exclude: string[] = []) => runNcu({
     packageFile: "package.json",
-    silent: true,
     upgrade: true,
     exclude,
 });
 
 export const diff = (exclude: string[] = []) => runNcu({
     packageFile: "package.json",
-    silent: true,
-    jsonUpgraded: true,
     exclude,
 });
 

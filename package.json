@@ -10,6 +10,8 @@
   "bin": "bin/ci-npm-update",
   "scripts": {
     "dry-run": "npm run build && bin/ci-npm-update",
+    "ncu": "ncu",
+    "ts-node": "ts-node",
     "preversion": "npm test",
     "postpublish": "git push origin master && git push origin --tags",
     "setup": "npm install && npm dedupe",
@@ -43,8 +45,8 @@
     "power-assert": "^1.4.1",
     "source-map-support": "^0.4.0",
     "to-iso-string": "^0.0.2",
-    "ts-node": "^1.2.1",
     "tslint": "^3.13.0",
-    "typescript": "^2.1.1"
+    "typescript": "^2.1.1",
+    "ts-node": "^2.1.0"
   }
 }
