@@ -46,9 +46,10 @@ export const diff = (exclude: string[] = []) => Promise.all([
 const NPM_BASE = "https://www.npmjs.com/package";
 
 export const createIssue = (xs: IVersionDiff) => {
-    const names = Object.keys(xs).map(name => `
-        * [${name} ${xs[name].installed}..${xs[name].updated}](${NPM_BASE}/${name})
-    `).join("\n");
+    const names = Object
+        .keys(xs)
+        .map(name => `* [${name} ${xs[name].installed}..${xs[name].updated}](${NPM_BASE}/${name})`)
+        .join("\n");
     return `## Updated packages\n\n${names}`;
 };
 
