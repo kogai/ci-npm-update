@@ -37,7 +37,8 @@ export function createGitBranch(branch: string): Promise<string> {
                 return Promise.reject(new AllDependenciesAreUpToDate());
             });
         }
-    });
+    })
+    .then(() => run("git checkout -"));
 }
 
 export function start({
