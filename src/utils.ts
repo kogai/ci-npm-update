@@ -15,8 +15,9 @@ export const diff = (exclude: string[] = []) => runNcu({
     exclude,
 });
 
+const NPM_BASE = "https://www.npmjs.com/package";
 export const createIssue = (xs: Diff) => {
-    const names = Object.keys(xs).map(name => `* ${name}`).join("\n");
+    const names = Object.keys(xs).map(name => `* [${name}](${NPM_BASE}/${name})`).join("\n");
     return `## Updated packages\n\n${names}`;
 };
 
