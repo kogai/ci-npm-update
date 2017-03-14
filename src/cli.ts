@@ -1,18 +1,18 @@
 import * as program from "commander";
 import * as main from "./index";
 
-const list = (x: string): string[] => x.split(',');
+const list = (x: string): string[] => x.split(",");
 
 const {GITHUB_ACCESS_TOKEN, GIT_USER_NAME, GIT_USER_EMAIL} = process.env;
 
 program
-  .version('0.0.1')
-  .usage('[options] <file ...>')
-  .option('-t, --token <n>', 'GitHubToken', GITHUB_ACCESS_TOKEN)
-  .option('-n, --user-name <n>', 'GitHubUserName', GIT_USER_NAME)
-  .option('-e, --user-email <n>', 'GitHubUserName', GIT_USER_EMAIL)
-  .option('-E, --execute <n>', 'should execute', false)
-  .option('-x, --exclude <items>', 'packages that ignore update', list)
+  .version("0.0.1")
+  .usage("[options] <file ...>")
+  .option("-t, --token <n>", "GitHubToken", GITHUB_ACCESS_TOKEN)
+  .option("-n, --user-name <n>", "GitHubUserName", GIT_USER_NAME)
+  .option("-e, --user-email <n>", "GitHubUserName", GIT_USER_EMAIL)
+  .option("-E, --execute", "should execute", false)
+  .option("-x, --exclude <items>", "packages that ignore update", list)
   .parse(process.argv);
 
 function die(message: string) {
@@ -20,8 +20,10 @@ function die(message: string) {
     process.exit(1);
 }
 
-["token", "userName", "useEmail"].forEach(x => {
-    if (program[x]) die(`No value for ${x}`);
+["token", "userName", "userEmail"].forEach(x => {
+    if (!program[x]) {
+        die(`No value for ${x}`);
+    }
 });
 
 const options: main.Options = {
