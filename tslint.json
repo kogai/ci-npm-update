@@ -19,6 +19,9 @@
             "check-type"
         ],
         "no-var-requires": false,
-        "no-require-imports": false
+        "no-require-imports": false,
+        "max-classes-per-file": [
+            false
+        ]
     }
 }

@@ -1,6 +1,6 @@
 import * as moment from "moment";
 import { GitHubApi, GitHubPullRequestParameters, GitHubPullRequestResponse }from "./github";
-import {read, diff, createIssue, run, IVersionDiff} from "./utils";
+import {createIssue, diff, IVersionDiff, read, run} from "./utils";
 
 export abstract class SkipRemainingTasks { }
 
@@ -14,7 +14,7 @@ export type Options = {
     gitUserEmail: string,
     execute: boolean, // default to dry-run mode
     exclude: string[],
-}
+};
 
 export function setupGitConfig(gitUserName: string, gitUserEmail: string): Promise<any> {
     const setUserNamePromise = gitUserName ? run(`git config user.name '${gitUserName}'`) : Promise.resolve();
@@ -22,14 +22,14 @@ export function setupGitConfig(gitUserName: string, gitUserEmail: string): Promi
     return Promise.all<any>([setUserNamePromise, setUserEmailPromise]);
 }
 
-export function createGitBranch(branch: string): Promise<string> {
+export function createGitBranch(branch: string, exclude: string[]): Promise<string> {
     console.log(`Creating a branch: ${branch}`);
 
     return run(`git checkout -b ${branch}`)
-    .then(() => read())
+    .then(() => read(exclude))
     .then(() => run("git add package.json"))
     .then(() => run("git diff --cached"))
-    .then(d => {
+    .then((d) => {
         if (d.trim()) {
             return run(`git commit -m 'update npm dependencies'`);
         } else {
@@ -42,10 +42,11 @@ export function createGitBranch(branch: string): Promise<string> {
 }
 
 export function start({
-    githubAccessToken: githubAccessToken,
-    gitUserName: gitUserName,
-    gitUserEmail: gitUserEmail,
-    execute: execute,
+    githubAccessToken,
+    gitUserName,
+    gitUserEmail,
+    execute,
+    exclude,
 }: Options): Promise<string> {
     if (execute) {
         console.assert(githubAccessToken, "Missing GITHUB_ACCESS_TOKEN or --token");
@@ -55,10 +56,10 @@ export function start({
     const branch = `npm-update/${timestamp}`;
 
     return setupGitConfig(gitUserName, gitUserEmail)
-    .then(() => diff())
+    .then(() => diff(exclude))
     .then((d: IVersionDiff) => createIssue(d))
     .then(async (issue) => {
-        await createGitBranch(branch);
+        await createGitBranch(branch, exclude);
 
         console.log("-------");
         console.log(issue);

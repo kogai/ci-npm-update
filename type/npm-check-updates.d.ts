@@ -8,6 +8,6 @@ declare module "npm-check-updates" {
     silent?: boolean,
     upgrade?: boolean,
     jsonUpgraded?: boolean,
-    exclude?: string[],
+    reject?: string[],
   }): Promise<Diff>;
 }

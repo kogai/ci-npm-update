@@ -20,7 +20,7 @@ function die(message: string) {
     process.exit(1);
 }
 
-["token", "userName", "userEmail"].forEach(x => {
+["token", "userName", "userEmail"].forEach((x) => {
     if (!program[x]) {
         die(`No value for ${x}`);
     }

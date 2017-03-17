@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import {readFile} from "fs";
+import { Diff, run as runNcu } from "npm-check-updates";
 import {merge, mergeAll} from "ramda";
-import { run as runNcu, Diff } from "npm-check-updates";
 
 export interface IVersionDiff {
   [key: string]: {
@@ -20,27 +20,30 @@ export const readPackageJson = () => new Promise<Diff>((resolve, reject) => {
     });
 });
 
-export const read = (exclude: string[] = []) => runNcu({
+export const read = (exclude: string[]) => runNcu({
     packageFile: "package.json",
     upgrade: true,
-    exclude,
+    reject: exclude,
 });
 
-export const diff = (exclude: string[] = []) => Promise.all([
-    runNcu({ packageFile: "package.json", exclude }),
+export const diff = (exclude: string[]) => Promise.all([
+    runNcu({
+        packageFile: "package.json",
+        reject: exclude,
+    }),
     readPackageJson(),
 ])
 .then(([update, installed]) => {
   return Object
     .keys(update)
-    .map(key => ({
+    .map((key) => ({
       [key]: {
         installed: installed[key],
         updated: update[key],
       },
     }));
 })
-.then(x => mergeAll<IVersionDiff>(x))
+.then((x) => mergeAll<IVersionDiff>(x))
 ;
 
 const NPM_BASE = "https://www.npmjs.com/package";
@@ -48,7 +51,7 @@ const NPM_BASE = "https://www.npmjs.com/package";
 export const createIssue = (xs: IVersionDiff) => {
     const names = Object
         .keys(xs)
-        .map(name => `* [x] [${name}:  ${xs[name].installed}...${xs[name].updated}](${NPM_BASE}/${name})`)
+        .map((name) => `* [x] [${name}:  ${xs[name].installed}...${xs[name].updated}](${NPM_BASE}/${name})`)
         .join("\n");
     return `## Updated packages\n\n${names}`;
 };
